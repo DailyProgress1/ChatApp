@@ -100,26 +100,22 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
-import { app, server } from "./lib/socket.js"; // or use `const app = express();` if not using socket.io
+import { app, server } from "./lib/socket.js";
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
+const __dirname = path.resolve();
 
-// fix for __dirname in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Middleware
-app.use(express.json()); // ✅ this line needs express imported!
+// ✅ Middleware
+app.use(express.json());
 app.use(cookieParser());
 
+// ✅ CORS setup (for Render frontend + local dev)
 app.use(
   cors({
     origin: ["http://localhost:5173", "https://chatapp-ui-bc0m.onrender.com"],
@@ -127,11 +123,11 @@ app.use(
   })
 );
 
-// Routes
+// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// Serve frontend in production
+// ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
@@ -140,7 +136,8 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+// ✅ Start server
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on PORT ${PORT}`);
+  console.log("Server running on port", PORT);
   connectDB();
 });
